@@ -99,8 +99,7 @@ program define gcomp_effects, rclass
 	}
 	fvexpand `parlist'
 	local parlist = r(varlist)
-
-	*disp "`parlist'"
+	
 	tempvar touse
 	gen `touse' = e(sample)
 	
@@ -159,27 +158,19 @@ program define gcomp_effects, rclass
 			for (i=1; i<=length(x_vals); i++) {
 				po_mean[i] = mean(po[, i])
 				po_infl[, i] = po[, i] :- po_mean[, i] + beta_infl*mean(asarray(X_int, i):*dmu_int[, i])'
-				po_infl2_1[, i] = po[, i] :- po_mean[, i]
-				po_infl2_2[, i] = beta_infl*mean(asarray(X_int, i):*dmu_int[, i])'
 			}
 			po_var = po_infl'*po_infl/n_obs
-			po_var2 = po_infl2_1'*po_infl2_1/n_obs + po_infl2_2'*po_infl2_2/n_obs // Terza's expression.
 			po_se = sqrt(diagonal(po_var):/n_obs)
-			po_se2 = sqrt(diagonal(po_var2):/n_obs)
 			st_matrix("po_mean", po_mean')
 			st_matrix("po_var", po_var)
 			st_matrix("po_se", po_se)
-			st_matrix("po_var2", po_var2)
-			st_matrix("po_se2", po_se2)
 			
 			if (ate_indicator) 
 			{
 				ate = po_mean[2] - po_mean[1]
 				ate_var = (-1, 1)*po_var[1::2, 1::2]*(-1 \ 1)
-				ate_var2 = (-1, 1)*po_var2[1::2, 1::2]*(-1 \ 1)
 				st_local("ate", strofreal(ate))
 				st_local("ate_se", strofreal(sqrt(ate_var/n_obs)))
-				st_local("ate_se2", strofreal(sqrt(ate_var2/n_obs)))
 			}
 			
 			if (rte_indicator)
@@ -370,7 +361,6 @@ program define gcomp_effects, rclass
 		if `ate_indicator' {
 			return scalar ate = `ate'
 			return scalar ate_se = `ate_se'
-			return scalar ate_se2 = `ate_se2'
 		}
 		if `rte_indicator' {
 			return scalar log_rte = `log_rte'

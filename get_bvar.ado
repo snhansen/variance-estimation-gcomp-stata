@@ -76,7 +76,7 @@ program define get_bvar, rclass
 		n_obs = `n_obs'
 		n_reps = `reps'
 		eb = st_matrix("e(b)")
-		par_est = select(eb, eb) 				// keeping only non-zero entries.
+		par_est = select(eb, eb) 		// keeping only non-zero entries.
 		ev = st_matrix("e(V)")
 		par_var = select(select(ev, eb), eb') 	// keeping only non-zero entries.
 		level = 1-(1-`level'/100)/2
@@ -102,13 +102,11 @@ program define get_bvar, rclass
 	
 	clear
 	getmata (`varlist' `e(depvar)') = data_samp
-	*save "D:\Projekter\Stefan Hansen\gcomp\temp.dta", replace
 	gen include = 1
 	mata: regpars = J(0, length(par_est), .)
 	
 	forvalues i = 1/`reps' {
 		qui cap `=regexr("`regcmd'", ", vce\(robust\)", "")' if inrange(_n, `=(`i'-1)*`n_obs'+1', `=`i'*`n_obs''), vce(robust)
-		*disp "`=regexr("`regcmd'", ", vce\(robust\)", "")' if inrange(_n, `=(`i'-1)*`n_obs'+1', `=`i'*`n_obs''), vce(robust)"
 		if _rc {
 			disp "Can't use bootstrap sample"
 			mata: n_reps = n_reps - 1
